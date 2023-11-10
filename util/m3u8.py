@@ -72,7 +72,11 @@ def download(m3u8_link, merged_mp4):
         for ts_filename in downloaded_ts:
             files_str += ts_filename+'|'
         files_str.rstrip('|')
-        ffmpeg.input(files_str).output(merged_mp4, c='copy', loglevel="quiet").run()
+        try:
+            ffmpeg.input(files_str).output(merged_mp4, c='copy', loglevel="quiet").run()
+        except ffmpeg.Error as e:
+            print(e.stderr, file=sys.stderr)
+            sys.exit(1)
         rprint("[red]END")
         shutil.rmtree("temp_ts")
     else:

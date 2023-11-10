@@ -36,7 +36,8 @@ def main(url):
             if "hls" in str(script):
                 
                 json_hsl = str(script).split("mainRoll")[1].split("features")[0].replace("},", "}").replace(": {", "{")
-                m3u8_url_master = json_hsl.split("videoUrl")[1].split("remote")[0].replace('":"', "").replace('","', "").replace("\/", "/")
+                m3u8_url_master = json_hsl.split("videoUrl")[1].split("remote")[0].replace(r'":"', "").replace(r'","', "").replace(r"\/", "/")
+
 
         headers = {
             'authority': 'www.youporn.com',
