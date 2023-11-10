@@ -47,13 +47,18 @@ def download_ts_file(ts_url: str, store_dir: str):
 def download(m3u8_link, merged_mp4):
     m3u8_http_base = m3u8_link.rstrip(m3u8_link.split("/")[-1])
     m3u8_content = requests.get(m3u8_link, headers=get_custom_header()).text
+
+    # Print the m3u8 content
+    print("M3U8 Content:")
+    print(m3u8_content)
+    
     m3u8 = m3u8_content.split('\n')
     ts_url_list = []
     ts_names = []
     for i_str in range(len(m3u8)):
         line_str = m3u8[i_str]
-        if line_str.startswith("#EXTINF"):
-            ts_url = m3u8[i_str+1]
+        if '.ts' in line_str:
+            ts_url = m3u8[i_str]
             ts_names.append(ts_url.split('/')[-1])
             if not ts_url.startswith("http"):
                 ts_url = m3u8_http_base + ts_url
@@ -62,16 +67,21 @@ def download(m3u8_link, merged_mp4):
         os.makedirs("temp_ts", exist_ok=True)
         pool = Pool(15)
         gen = pool.imap(partial(download_ts_file, store_dir="temp_ts"), ts_url_list)
-        for _ in tqdm(gen, total=len(ts_url_list), unit="bytes", unit_scale=True, unit_divisor=1024, desc="[yellow]Download"):
-            pass
+        for i in range(len(ts_url_list)):
+            _ = ts_url_list[i]
+            print(f"Downloaded: {_}")  # Print the name of the .ts file after it's downloaded
         pool.close()
         pool.join()
         time.sleep(1)
-        downloaded_ts = sorted(glob.glob("temp_ts\*.ts"), key=lambda x:float(re.findall("(\d+)",x)[0]))
+
+        # After downloading the .ts files
+        downloaded_ts = sorted(glob.glob(os.path.join("temp_ts", "*.ts")), key=lambda x:float(re.findall("(\\d+)",x)[0]))
         files_str = "concat:"
+        # Before calling ffmpeg
         for ts_filename in downloaded_ts:
-            files_str += ts_filename+'|'
+            files_str += os.path.join(ts_filename)+'|'
         files_str.rstrip('|')
+
         try:
             ffmpeg.input(files_str).output(merged_mp4, c='copy', loglevel="quiet").run()
         except ffmpeg.Error as e:
