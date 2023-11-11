@@ -1,7 +1,9 @@
 # 21.08.2023 -> 15.09.2023
 
 # Import
+import os
 import requests, sys
+import datetime
 from bs4 import BeautifulSoup
 from util.m3u8 import download
 from random_user_agent.user_agent import UserAgent
@@ -21,9 +23,20 @@ def get_fake_headers():
     return {"User-Agent" : user_agent}
 
 def main(url):
-    
+    # Get today's date
+    today = datetime.date.today()
+
+    # Convert the date into a string in the format 'YYYY-MM-DD'
+    date_string = today.strftime('%Y-%m-%d')
+
+    # Create a new directory with today's date
+    os.makedirs(f'videos/{date_string}', exist_ok=True)
+
     title = url.split("/")[-2].replace("_", " ").replace("-", " ")
     console.log(f"[blue]FIND: [purple]{title}")
+
+    # Now, you can save the video in this directory
+    merged_mp4 = f'videos/{date_string}/{title}.mp4'
 
     r = requests.get(url)
     console.log(f"[blue]RESPONSE SITE: [red]{r.status_code}")
@@ -67,7 +80,7 @@ def main(url):
                     ts_names.append([ts_url.split('/')[0].split("-")[1].replace("p", ""), ts_url.split('/')[0]])
             
             console.log(f"[blue]FIND MASTER BASE: [purple]{m3u8_http_base}")
-            download(m3u8_http_base+ts_names[0][1], title+".mp4")
+            download(m3u8_http_base+ts_names[0][1], merged_mp4)
 
         else:
             console.log("[red]ERROR API")

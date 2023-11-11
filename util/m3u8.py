@@ -4,11 +4,11 @@
 import os, re, glob, time, requests, subprocess, sys, shutil, ffmpeg
 from tqdm.rich import tqdm
 from rich import print as rprint
-from functools import partial
 from requests.models import Response
 from multiprocessing.dummy import Pool
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
+from functools import partial
 
 # Disable warning
 import warnings
@@ -47,10 +47,6 @@ def download_ts_file(ts_url: str, store_dir: str):
 def download(m3u8_link, merged_mp4):
     m3u8_http_base = m3u8_link.rstrip(m3u8_link.split("/")[-1])
     m3u8_content = requests.get(m3u8_link, headers=get_custom_header()).text
-
-    # Print the m3u8 content
-    print("M3U8 Content:")
-    print(m3u8_content)
     
     m3u8 = m3u8_content.split('\n')
     ts_url_list = []
